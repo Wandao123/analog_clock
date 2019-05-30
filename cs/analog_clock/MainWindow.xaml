@@ -1,0 +1,69 @@
+﻿<Window x:Class="analog_clock.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:analog_clock"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="Analog clock" ResizeMode="NoResize" AllowsTransparency="True" WindowStyle="None" Background="Transparent" Height="350" Width="350" ShowInTaskbar="False">
+    <Window.Resources>
+        <sys:Double x:Key="FrameDiameter">100</sys:Double>
+        <sys:Double x:Key="FrameCenter">50</sys:Double>
+        <sys:Double x:Key="StartingPoint">55</sys:Double>  <!-- center + radius * 0.10 -->
+        <sys:Double x:Key="HourHandEnd">25</sys:Double>    <!-- center - radius * 0.50 -->
+        <sys:Double x:Key="MinuteHandEnd">15</sys:Double>  <!-- center - radius * 0.70 -->
+        <sys:Double x:Key="SecondHandEnd">10</sys:Double>  <!-- center - radius * 0.80 -->
+        <sys:Double x:Key="NailDiameter">4</sys:Double>
+        <sys:Double x:Key="NailPosition">48</sys:Double>   <!-- center - nailRadius -->
+    </Window.Resources>
+    <Window.ContextMenu>
+        <ContextMenu>
+            <MenuItem Header="終了" Click="Quit_Clicked"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+    <Border>
+        <Viewbox>
+            <!--<Grid VerticalAlignment="Center" HorizontalAlignment="Center">-->
+            <Canvas x:Name="dials" Height="{StaticResource FrameDiameter}" Width="{StaticResource FrameDiameter}">
+                <Ellipse x:Name="frame" Stroke="#CCCCCC" Height="{StaticResource FrameDiameter}" Width="{StaticResource FrameDiameter}" StrokeThickness="1" Fill="White" Opacity="0.7"/>
+
+                <Line x:Name="hourHand" X1="{StaticResource FrameCenter}" Y1="{StaticResource StartingPoint}" X2="{StaticResource FrameCenter}" Y2="{StaticResource HourHandEnd}" Stroke="Black" StrokeThickness="5" StrokeEndLineCap="Round">
+                    <Line.RenderTransform>
+                        <RotateTransform CenterX="{StaticResource FrameCenter}" CenterY="{StaticResource FrameCenter}"  Angle="0"/>
+                    </Line.RenderTransform>
+                    <Line.Resources>
+                        <Storyboard x:Key="hourHandStoryboard">
+                            <DoubleAnimation Storyboard.TargetName="hourHand" Storyboard.TargetProperty="(Rectangle.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="12:0:0" RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </Line.Resources>
+                </Line>
+
+                <Line x:Name="minuteHand" X1="{StaticResource FrameCenter}" Y1="{StaticResource StartingPoint}" X2="{StaticResource FrameCenter}" Y2="{StaticResource MinuteHandEnd}" Stroke="Black" StrokeThickness="3" StrokeEndLineCap="Triangle">
+                    <Line.RenderTransform>
+                        <RotateTransform CenterX="{StaticResource FrameCenter}" CenterY="{StaticResource FrameCenter}"  Angle="0"/>
+                    </Line.RenderTransform>
+                    <Line.Resources>
+                        <Storyboard x:Key="minuteHandStoryboard">
+                            <DoubleAnimation Storyboard.TargetName="minuteHand" Storyboard.TargetProperty="(Rectangle.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="1:0:0" RepeatBehavior="Forever"/>
+                        </Storyboard>
+                    </Line.Resources>
+                </Line>
+
+                <Line x:Name="secondHand" X1="{StaticResource FrameCenter}" Y1="{StaticResource StartingPoint}" X2="{StaticResource FrameCenter}" Y2="{StaticResource SecondHandEnd}" Stroke="Black" StrokeThickness="1" StrokeEndLineCap="Triangle">
+                    <Line.RenderTransform>
+                        <RotateTransform CenterX="{StaticResource FrameCenter}" CenterY="{StaticResource FrameCenter}"  Angle="0"/>
+                    </Line.RenderTransform>
+                    <Line.Resources>
+                        <Storyboard x:Key="secondHandStoryboard">
+                            <!--<DoubleAnimation Storyboard.TargetName="secondHand" Storyboard.TargetProperty="(Rectangle.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:1:0" RepeatBehavior="Forever"/>-->
+                        </Storyboard>
+                    </Line.Resources>
+                </Line>
+
+                <Ellipse Width="{StaticResource NailDiameter}" Height="{StaticResource NailDiameter}" Fill="Yellow" Stroke="Gold" Canvas.Left="{StaticResource NailPosition}" Canvas.Top="{StaticResource NailPosition}"/>
+            </Canvas>
+            <!--</Grid>-->
+        </Viewbox>
+    </Border>
+</Window>

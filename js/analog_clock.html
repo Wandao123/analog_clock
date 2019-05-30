@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Analog clock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <style>
+        .wrapper {
+            height: 100%;
+            position: fixed;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <canvas id="canvas"></canvas>
+    </div> 
+
+    <script>
+        const wrapper = document.getElementsByClassName("wrapper");
+        const canvas = document.getElementById("canvas");
+        const context = canvas.getContext("2d");
+
+        /* 画面の大きさを変更した時の処理 */
+        function sizing() {
+            canvas.height = wrapper[0].offsetHeight;
+            canvas.width = wrapper[0].offsetWidth;
+        }
+        window.addEventListener("resize", sizing, false);
+        sizing();
+
+        /* 文字盤の描画 */
+        function drawClockFace(centerX, centerY, radius) {
+            // 縁の描画
+            context.beginPath();
+            context.lineWidth = radius * 1.0 / 100;
+            context.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+            context.stroke();
+
+            // 目盛りの描画
+            let drawADial = (angle, lineLength, thickness) => {
+                const startingPoint = radius * 95.0 / 100;
+                context.beginPath();
+                context.lineWidth = thickness;
+                context.moveTo(centerX + startingPoint * Math.sin(angle),
+                    centerY - startingPoint * Math.cos(angle));
+                context.lineTo(centerX + (startingPoint - lineLength) * Math.sin(angle),
+                    centerY - (startingPoint - lineLength) * Math.cos(angle));
+                context.stroke();
+            };
+            for (let minutes = 0; minutes < 60; minutes++) {
+                if (minutes % 5 == 0)
+                    drawADial(minutes * Math.PI / 30.0, radius * 2.0 / 25, 4);
+                else
+                    drawADial(minutes * Math.PI / 30.0, radius / 25, 2);
+            }
+
+            // 数字を書く
+            let writeANumber = hours => {
+                const StartingPoint = radius * 75.0 / 100;
+                const FontSize = radius * 20.0 / 100;
+                context.font = FontSize.toString() + "px 'Yu Mincho'";
+                context.textAlign = "center";
+                context.textBaseline = "middle";
+                context.fillText(hours.toString(),
+                    centerX + StartingPoint * Math.sin(hours * Math.PI / 6.0),
+                    centerY - StartingPoint * Math.cos(hours * Math.PI / 6.0) + FontSize / 8.0);   // 文字の垂直中心から若干ずれるため補正
+            };
+            for (let hours = 1; hours <= 12; hours++)
+                writeANumber(hours);
+        }
+
+        /* 短針、長針、秒針の描画 */
+        function drawClockHands(centerX, centerY, radius, dateTime) {
+            const StartingPoint = radius / 10.0;
+            const Hours = dateTime.getHours();
+            const Minutes = dateTime.getMinutes();
+            const Seconds = dateTime.getSeconds();
+
+            const HourHandEnd = radius * 50.0 / 100;
+            context.beginPath();
+            context.lineWidth = radius * 10.0 / 100;
+            context.lineCap = "round";
+            context.moveTo(centerX - StartingPoint * Math.sin((Hours + Minutes / 60.0) * Math.PI / 6.0),
+                centerY + StartingPoint * Math.cos((Hours + Minutes / 60.0) * Math.PI / 6.0));
+            context.lineTo(centerX + HourHandEnd * Math.sin((Hours + Minutes / 60.0) * Math.PI / 6.0),
+                centerY - HourHandEnd * Math.cos((Hours + Minutes / 60.0) * Math.PI / 6.0));
+            context.stroke();
+
+            const MinuteHandEnd = radius * 70.0 / 100;
+            context.beginPath();
+            context.lineWidth = radius * 6.0 / 100;
+            context.lineCap = "butt";
+            context.moveTo(centerX - StartingPoint * Math.sin((Minutes + Seconds / 60.0) * Math.PI / 30.0),
+                centerY + StartingPoint * Math.cos((Minutes + Seconds / 60.0) * Math.PI / 30.0));
+            context.lineTo(centerX + MinuteHandEnd * Math.sin((Minutes + Seconds / 60.0) * Math.PI / 30.0),
+                centerY - MinuteHandEnd * Math.cos((Minutes + Seconds / 60.0) * Math.PI / 30.0));
+            context.stroke();
+
+            const SecondHandEnd = radius * 80.0 / 100;
+            context.beginPath();
+            context.lineWidth = radius * 2.0 / 100;
+            context.moveTo(centerX - StartingPoint * Math.sin(Seconds * Math.PI / 30.0),
+                centerY + StartingPoint * Math.cos(Seconds * Math.PI / 30.0));
+            context.lineTo(centerX + SecondHandEnd * Math.sin(Seconds * Math.PI / 30.0),
+                centerY - SecondHandEnd * Math.cos(Seconds * Math.PI / 30.0));
+            context.stroke();
+        }
+
+        /* メインループ */
+        function mainLoop() {
+            let frameCenterX = canvas.width / 2.0;
+            let frameCenterY = canvas.height / 2.0;
+            let frameRadius = Math.min(canvas.height, canvas.width) / 2 * 0.97;   // 100% だと画面に収まらない
+            let image = new Image();
+
+            drawClockFace(frameCenterX, frameCenterY, frameRadius);
+            image.src = canvas.toDataURL();
+            console.log("initialization");
+
+            return () => {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(image, 0, 0);
+                drawClockHands(frameCenterX, frameCenterY, frameRadius, new Date());
+            };
+        }
+        let render = mainLoop();
+        window.addEventListener("resize", () => render = mainLoop(), false);
+        //window.onload = render;
+        setInterval(render, 100);
+    </script>
+</body>
+</html>
